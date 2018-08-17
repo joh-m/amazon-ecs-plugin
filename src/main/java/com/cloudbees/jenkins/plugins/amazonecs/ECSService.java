@@ -64,6 +64,8 @@ import com.amazonaws.services.ecs.model.LogConfiguration;
 import com.amazonaws.services.ecs.model.NetworkConfiguration;
 import com.amazonaws.services.ecs.model.RegisterTaskDefinitionRequest;
 import com.amazonaws.services.ecs.model.RegisterTaskDefinitionResult;
+import com.amazonaws.services.ecs.model.DeregisterTaskDefinitionRequest;
+import com.amazonaws.services.ecs.model.DeregisterTaskDefinitionResult;
 import com.amazonaws.services.ecs.model.Resource;
 import com.amazonaws.services.ecs.model.RunTaskRequest;
 import com.amazonaws.services.ecs.model.RunTaskResult;
@@ -163,7 +165,7 @@ class ECSService {
      */
     TaskDefinition registerTemplate(final ECSCloud cloud, final ECSTaskTemplate template) {
         final AmazonECSClient client = getAmazonECSClient();
-        
+
         String familyName = fullQualifiedTemplateName(cloud, template);
         final ContainerDefinition def = new ContainerDefinition()
                 .withName(familyName)
@@ -197,7 +199,7 @@ class ECSService {
             def.withEnvironment(new KeyValuePair()
                 .withName("JAVA_OPTS").withValue(template.getJvmArgs()))
                 .withEssential(true);
-        
+
         if (template.getContainerUser() != null)
             def.withUser(template.getContainerUser());
 
@@ -232,12 +234,12 @@ class ECSService {
             LOGGER.log(Level.INFO, "Match on execution role: {0}", new Object[] {templateMatchesExistingExecutionRole});
             LOGGER.log(Level.FINE, "Match on execution role: {0}; template={1}; last={2}", new Object[] {templateMatchesExistingExecutionRole, template.getExecutionRole(), currentTaskDefinition.getExecutionRoleArn()});
         }
-        
+
         if(templateMatchesExistingContainerDefinition && templateMatchesExistingVolumes && templateMatchesExistingTaskRole && templateMatchesExistingExecutionRole) {
             LOGGER.log(Level.FINE, "Task Definition already exists: {0}", new Object[]{currentTaskDefinition.getTaskDefinitionArn()});
             return currentTaskDefinition;
         } else {
-            final RegisterTaskDefinitionRequest request = new RegisterTaskDefinitionRequest()                
+            final RegisterTaskDefinitionRequest request = new RegisterTaskDefinitionRequest()
                     .withFamily(familyName)
                     .withVolumes(template.getVolumeEntries())
                     .withContainerDefinitions(def);
@@ -255,7 +257,7 @@ class ECSService {
             }
             if (template.getTaskrole() != null) {
                 request.withTaskRoleArn(template.getTaskrole());
-            }            
+            }
             final RegisterTaskDefinitionResult result = client.registerTaskDefinition(request);
             LOGGER.log(Level.FINE, "Created Task Definition {0}: {1}", new Object[]{result.getTaskDefinition(), request});
             LOGGER.log(Level.INFO, "Created Task Definition: {0}", new Object[]{result.getTaskDefinition()});
@@ -282,6 +284,23 @@ class ECSService {
 
             return null;
         }
+    }
+
+    void removeTemplate(final ECSCloud cloud, final ECSTaskTemplate template) {
+        // TODO finish implementation
+        // AmazonECSClient client = getAmazonECSClient();
+        //
+        // String familyName = fullQualifiedTemplateName(cloud, template);
+        //
+        // try {
+        //     DeregisterTaskDefinitionResult result = client.deregisterTaskDefinition(
+        //             new DeregisterTaskDefinitionRequest()
+        //                     .withTaskDefinition(findTaskDefinition(familyName)));
+        //
+        // } catch (ClientException e) {
+        //     LOGGER.log(Level.FINE, "No existing task definition found for family or ARN: " + familyName, e);
+        //     LOGGER.log(Level.INFO, "No existing task definition found for family or ARN: " + familyName);
+        // }
     }
 
     private String fullQualifiedTemplateName(final ECSCloud cloud, final ECSTaskTemplate template) {

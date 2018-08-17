@@ -56,12 +56,13 @@ import javax.annotation.Nullable;
 import javax.servlet.ServletException;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> {
+public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> implements Serializable {
     /**
      * Template Name
      */

@@ -126,6 +126,12 @@ public class ECSCloud extends Cloud {
         }
     }
 
+    public static @Nonnull ECSCloud getByName(@Nonnull String name) throws IllegalArgumentException {
+        Cloud cloud = Jenkins.get().clouds.getByName(name);
+        if (cloud instanceof ECSCloud) return (ECSCloud) cloud;
+        throw new IllegalArgumentException("'" + name + "' is not an ECS cloud but " + cloud);
+    }
+
     synchronized ECSService getEcsService() {
         if (ecsService == null) {
             ecsService = new ECSService(credentialsId, regionName);
@@ -140,6 +146,15 @@ public class ECSCloud extends Cloud {
     @Nonnull
     public List<ECSTaskTemplate> getTemplates() {
         return templates != null ? templates : Collections.<ECSTaskTemplate> emptyList();
+    }
+
+    public void registerTemplate(ECSTaskTemplate template) {
+        templates.add(template);
+    }
+
+    public void removeTemplate(ECSTaskTemplate template) {
+        getEcsService().removeTemplate(this, template);
+        templates.remove(template);
     }
 
     public String getCredentialsId() {
@@ -193,13 +208,13 @@ public class ECSCloud extends Cloud {
     @Override
     public Collection<NodeProvisioner.PlannedNode> provision(Label label, int excessWorkload) {
         try {
-			LOGGER.log(Level.INFO, "Asked to provision {0} slave(s) for: {1}", new Object[]{excessWorkload, label});
+			      LOGGER.log(Level.INFO, "Asked to provision {0} slave(s) for: {1}", new Object[]{excessWorkload, label});
 
             List<NodeProvisioner.PlannedNode> r = new ArrayList<NodeProvisioner.PlannedNode>();
             final ECSTaskTemplate template = getTemplate(label);
 
             for (int i = 1; i <= excessWorkload; i++) {
-				LOGGER.log(Level.INFO, "Will provision {0}, for label: {1}", new Object[]{template.getDisplayName(), label} );
+				        LOGGER.log(Level.INFO, "Will provision {0}, for label: {1}", new Object[]{template.getDisplayName(), label} );
 
                 r.add(new NodeProvisioner.PlannedNode(template.getDisplayName(), Computer.threadPoolForRemoting
                   .submit(new ProvisioningCallback(template, label)), 1));
@@ -280,7 +295,7 @@ public class ECSCloud extends Cloud {
                             new Object[] { slave.getNodeName(), taskArn });
                     slave.setTaskArn(taskArn);
                 } catch (Exception ex) {
-                    LOGGER.log(Level.WARNING, "Slave {0} - Cannot create ECS Task");
+                    LOGGER.log(Level.WARNING, "Slave {0} - Cannot create ECS Task", slave.getNodeName());
                     Jenkins.getInstance().removeNode(slave);
                     throw ex;
                 }
