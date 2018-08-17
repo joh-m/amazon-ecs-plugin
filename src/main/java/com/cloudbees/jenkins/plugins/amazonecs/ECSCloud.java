@@ -127,7 +127,7 @@ public class ECSCloud extends Cloud {
     }
 
     public static @Nonnull ECSCloud getByName(@Nonnull String name) throws IllegalArgumentException {
-        Cloud cloud = Jenkins.get().clouds.getByName(name);
+        Cloud cloud = Jenkins.getInstance().clouds.getByName(name);
         if (cloud instanceof ECSCloud) return (ECSCloud) cloud;
         throw new IllegalArgumentException("'" + name + "' is not an ECS cloud but " + cloud);
     }

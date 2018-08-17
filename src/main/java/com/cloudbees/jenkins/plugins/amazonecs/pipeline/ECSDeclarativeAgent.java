@@ -69,7 +69,7 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
 
 
     public Map<String,Object> getAsArgs() {
-        Map<String,Object> argMap = new TreeMap<>();
+        Map<String,Object> argMap = new TreeMap<String, Object>();
 
         LOGGER.log(Level.INFO, "In getAsArgs. label: {0}", label);
 
@@ -104,5 +104,9 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
     @OptionalExtension(requirePlugins = "pipeline-model-extensions")
     @Symbol("ecs")
     public static class DescriptorImpl extends DeclarativeAgentDescriptor<ECSDeclarativeAgent> {
+      @Override
+      public String getDisplayName() {
+          return "ECS Agent";
+      }
     }
 }

@@ -45,7 +45,7 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
         //ECSTaskTemplateAction taskTemplateAction = run.getAction(ECSTaskTemplateAction.class);
         String randString = RandomStringUtils.random(5, "bcdfghjklmnpqrstvwxz0123456789");
         String name = String.format(NAME_FORMAT, step.getName(), randString);
-        Cloud cloud = Jenkins.get().getCloud(this.cloud);
+        Cloud cloud = Jenkins.getInstance().getCloud(this.cloud);
         ECSCloud ecsCloud = (ECSCloud) cloud;
         ECSTaskTemplate template = new ECSTaskTemplate(name,
                                                        label,
@@ -96,7 +96,7 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
          * Remove the template after step is done
          */
         protected void finished(StepContext context) throws Exception {
-            Cloud c = Jenkins.get().getCloud(cloud);
+            Cloud c = Jenkins.getInstance().getCloud(cloud);
             if (c == null) {
                 LOGGER.log(Level.WARNING, "Cloud {0} no longer exists, cannot delete task template {1}",
                         new Object[] { cloud, taskTemplate.getTemplateName() });
