@@ -2,22 +2,17 @@ package com.cloudbees.jenkins.plugins.amazonecs.pipeline;
 
 import jenkins.model.Jenkins;
 import hudson.slaves.Cloud;
-import hudson.model.Run;
-import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepExecutionImpl;
 import org.jenkinsci.plugins.workflow.steps.BodyExecutionCallback;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import javax.annotation.Nonnull;
 import com.cloudbees.jenkins.plugins.amazonecs.ECSCloud;
 import com.cloudbees.jenkins.plugins.amazonecs.ECSTaskTemplate;
-import com.cloudbees.jenkins.plugins.amazonecs.pipeline.ECSTaskTemplateAction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.RandomStringUtils;
 
 
-
-//public class ECSTaskTemplateStepExecution extends SynchronousNonBlockingStepExecution<String> {
 public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(ECSTaskTemplateStepExecution.class.getName());
@@ -28,6 +23,8 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
     private final @Nonnull String cloud;
     private final @Nonnull String label;
 
+    private ECSTaskTemplate newTemplate = null;
+
     ECSTaskTemplateStepExecution(ECSTaskTemplateStep ecsTaskTemplateStep, StepContext context) {
         super(context);
         this.step = ecsTaskTemplateStep;
@@ -36,49 +33,62 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
     }
 
     @Override
-    //public String run() throws Exception {
     public boolean start() throws Exception {
         LOGGER.log(Level.INFO, "In ECSTaskTemplateExecution run()");
         LOGGER.log(Level.INFO, "cloud: {0}", this.cloud);
         LOGGER.log(Level.INFO, "label: {0}", label);
-        //Run<?, ?> run = getContext().get(Run.class);
-        //ECSTaskTemplateAction taskTemplateAction = run.getAction(ECSTaskTemplateAction.class);
         String randString = RandomStringUtils.random(5, "bcdfghjklmnpqrstvwxz0123456789");
         String name = String.format(NAME_FORMAT, step.getName(), randString);
+
         Cloud cloud = Jenkins.getInstance().getCloud(this.cloud);
         ECSCloud ecsCloud = (ECSCloud) cloud;
-        ECSTaskTemplate template = new ECSTaskTemplate(name,
-                                                       label,
-                                                       null,
-                                                       step.getImage(),
-                                                       null,
-                                                       null,
-                                                       step.getMemory(),
-                                                       0,
-                                                       step.getCpu(),
-                                                       null,
-                                                       null,
-                                                       false,
-                                                       false,
-                                                       null,
-                                                       null,
-                                                       null,
-                                                       null,
-                                                       null,
-                                                       null);
+        newTemplate = new ECSTaskTemplate(name,  // Template name
+                                          label, // Node label
+                                          null,  // Task definition override
+                                          step.getImage(), // Image name
+                                          null,  // Launch type
+                                          null,  // Remote FS root
+                                          step.getMemory(), // Memory
+                                          0,     // Memory reservation
+                                          step.getCpu(),  // CPU
+                                          null,  // Subnets
+                                          null,  // Security groups
+                                          false, // Assign public IP
+                                          false, // Privileged
+                                          null,  // Container user
+                                          null,  // Log driver options
+                                          null,  // Environments
+                                          null,  // Extra host entries
+                                          null,  // Mount points
+                                          null); // Port mappings
 
-        template.setTaskrole(step.getTaskRoleArn());
-        ecsCloud.registerTemplate(template);
-        getContext().newBodyInvoker().withContext(step).withCallback(new ECSTaskTemplateCallback(template)).start();
-        //ECSTaskTemplateAction.push(run, name);
-        //return "myname";
+        newTemplate.setTaskrole(step.getTaskRoleArn());
+        ecsCloud.registerTemplate(newTemplate);
+        getContext().newBodyInvoker().withContext(step).withCallback(new ECSTaskTemplateCallback(newTemplate)).start();
         return false;
     }
 
     @Override
     public void stop(Throwable cause) throws Exception {
         super.stop(cause);
-        //new ECSTaskTemplateAction(getContext().get(Run.class)).pop();
+    }
+
+    /**
+     * Re-inject the dynamic template when resuming the pipeline
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        Cloud c = Jenkins.getInstance().getCloud(cloud);
+        if (c == null) {
+            throw new RuntimeException(String.format("Cloud does not exist: %s", cloud));
+        }
+        if (!(c instanceof ECSCloud)) {
+            throw new RuntimeException(String.format("Cloud is not a Kubernetes cloud: %s (%s)", cloud,
+                    cloud.getClass().getName()));
+        }
+        ECSCloud ecsCloud = (ECSCloud) c;
+        ecsCloud.registerTemplate(newTemplate);
     }
 
     private class ECSTaskTemplateCallback extends BodyExecutionCallback.TailCall {

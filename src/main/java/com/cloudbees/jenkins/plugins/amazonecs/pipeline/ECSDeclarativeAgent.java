@@ -1,6 +1,5 @@
 package com.cloudbees.jenkins.plugins.amazonecs.pipeline;
 
-import hudson.Extension;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.pipeline.modeldefinition.agent.DeclarativeAgent;

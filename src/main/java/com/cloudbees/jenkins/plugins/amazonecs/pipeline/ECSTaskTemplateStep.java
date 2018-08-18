@@ -8,7 +8,6 @@ import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import hudson.model.Run;
@@ -99,14 +98,13 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         @Override
         public Set<? extends Class<?>> getRequiredContext() {
             return ImmutableSet.of(Run.class, TaskListener.class);
-            //return Collections.singleton(TaskListener.class);
         }
     }
 
     @Override
     public String toString() {
         return "Step options: " +
-                "ECSNodeStep{" + '\n' +
+                "ecs{" + '\n' +
                 "cloud='" + cloud + '\'' + '\n' +
                 '}';
     }
