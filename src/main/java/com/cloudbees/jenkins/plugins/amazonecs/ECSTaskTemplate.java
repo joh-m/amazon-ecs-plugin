@@ -35,15 +35,12 @@ import com.amazonaws.services.ecs.model.KeyValuePair;
 import com.amazonaws.services.ecs.model.LaunchType;
 import com.amazonaws.services.ecs.model.MountPoint;
 import com.amazonaws.services.ecs.model.RegisterTaskDefinitionRequest;
-import com.amazonaws.services.ecs.model.Volume;
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.model.Label;
 import hudson.model.labels.LabelAtom;
 import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-
 import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -63,6 +60,8 @@ import java.util.*;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * Template Name
      */

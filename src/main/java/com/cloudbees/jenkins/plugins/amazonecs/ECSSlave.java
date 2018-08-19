@@ -36,7 +36,6 @@ import javax.annotation.concurrent.GuardedBy;
 import hudson.model.Descriptor;
 import hudson.model.TaskListener;
 import hudson.node_monitors.ResponseTimeMonitor;
-import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.ComputerLauncher;
 import hudson.slaves.RetentionStrategy;
@@ -50,6 +49,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class ECSSlave extends AbstractCloudSlave {
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = Logger.getLogger(ECSCloud.class.getName());
 
@@ -70,7 +70,7 @@ public class ECSSlave extends AbstractCloudSlave {
     @CheckForNull
     private String taskArn;
 
-    private static RetentionStrategy deleteAfterFinished = new RetentionStrategy<ECSComputer>() {
+    private static RetentionStrategy<ECSComputer> deleteAfterFinished = new RetentionStrategy<ECSComputer>() {
         @Override
         public boolean isManualLaunchAllowed(ECSComputer c) {
             return false;
@@ -155,7 +155,7 @@ public class ECSSlave extends AbstractCloudSlave {
     }
 
     @Override
-    public AbstractCloudComputer createComputer() {
+    public ECSComputer createComputer() {
         return new ECSComputer(this);
     }
 

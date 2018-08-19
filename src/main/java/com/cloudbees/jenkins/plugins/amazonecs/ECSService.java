@@ -43,10 +43,9 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.ecs.AmazonECSClient;
+import com.amazonaws.services.ecs.AmazonECS;
+import com.amazonaws.services.ecs.AmazonECSClientBuilder;
 import com.amazonaws.services.ecs.model.AwsVpcConfiguration;
 import com.amazonaws.services.ecs.model.ContainerDefinition;
 import com.amazonaws.services.ecs.model.ContainerInstance;
@@ -64,8 +63,8 @@ import com.amazonaws.services.ecs.model.LogConfiguration;
 import com.amazonaws.services.ecs.model.NetworkConfiguration;
 import com.amazonaws.services.ecs.model.RegisterTaskDefinitionRequest;
 import com.amazonaws.services.ecs.model.RegisterTaskDefinitionResult;
-import com.amazonaws.services.ecs.model.DeregisterTaskDefinitionRequest;
-import com.amazonaws.services.ecs.model.DeregisterTaskDefinitionResult;
+//import com.amazonaws.services.ecs.model.DeregisterTaskDefinitionRequest;
+//import com.amazonaws.services.ecs.model.DeregisterTaskDefinitionResult;
 import com.amazonaws.services.ecs.model.Resource;
 import com.amazonaws.services.ecs.model.RunTaskRequest;
 import com.amazonaws.services.ecs.model.RunTaskResult;
@@ -97,8 +96,8 @@ class ECSService {
         this.regionName = regionName;
     }
 
-    AmazonECSClient getAmazonECSClient() {
-        final AmazonECSClient client;
+    AmazonECS getAmazonECSClient() {
+        final AmazonECS client;
 
         ProxyConfiguration proxy = Jenkins.getInstance().proxy;
         ClientConfiguration clientConfiguration = new ClientConfiguration();
@@ -113,25 +112,31 @@ class ECSService {
         if (credentials == null) {
             // no credentials provided, rely on com.amazonaws.auth.DefaultAWSCredentialsProviderChain
             // to use IAM Role define at the EC2 instance level ...
-            client = new AmazonECSClient(clientConfiguration);
+            client = AmazonECSClientBuilder.standard()
+                                           .withClientConfiguration(clientConfiguration)
+                                           .withRegion(getRegion(regionName))
+                                           .build();
         } else {
             if (LOGGER.isLoggable(Level.FINE)) {
                 String awsAccessKeyId = credentials.getCredentials().getAWSAccessKeyId();
                 String obfuscatedAccessKeyId = StringUtils.left(awsAccessKeyId, 4) + StringUtils.repeat("*", awsAccessKeyId.length() - (2 * 4)) + StringUtils.right(awsAccessKeyId, 4);
                 LOGGER.log(Level.FINE, "Connect to Amazon ECS with IAM Access Key {1}", new Object[]{obfuscatedAccessKeyId});
             }
-            client = new AmazonECSClient(credentials, clientConfiguration);
+            client = AmazonECSClientBuilder.standard()
+                        .withClientConfiguration(clientConfiguration)
+                        .withRegion(getRegion(regionName))
+                        .withCredentials(credentials)
+                        .build();
         }
-        client.setRegion(getRegion(regionName));
         LOGGER.log(Level.FINE, "Selected Region: {0}", regionName);
         return client;
     }
 
-    Region getRegion(String regionName) {
+    private Regions getRegion(String regionName) {
         if (StringUtils.isNotEmpty(regionName)) {
-            return RegionUtils.getRegion(regionName);
+            return Regions.fromName(regionName);
         } else {
-            return Region.getRegion(Regions.US_EAST_1);
+            return Regions.US_EAST_1;
         }
     }
 
@@ -141,7 +146,7 @@ class ECSService {
     }
 
     void deleteTask(String taskArn, String clusterArn) {
-        final AmazonECSClient client = getAmazonECSClient();
+        final AmazonECS client = getAmazonECSClient();
 
         LOGGER.log(Level.INFO, "Delete ECS Slave task: {0}", taskArn);
         try {
@@ -156,7 +161,7 @@ class ECSService {
      * If no, register a new task definition with desired parameters and returns the new TaskDefinition.
      */
     TaskDefinition registerTemplate(final ECSCloud cloud, final ECSTaskTemplate template) {
-        final AmazonECSClient client = getAmazonECSClient();
+        final AmazonECS client = getAmazonECSClient();
 
         String familyName = fullQualifiedTemplateName(cloud, template);
         final ContainerDefinition def = new ContainerDefinition()
@@ -262,7 +267,7 @@ class ECSService {
      * The parameter may be a task definition family, family with revision, or full task definition ARN.
      */
     TaskDefinition findTaskDefinition(String familyOrArn) {
-        AmazonECSClient client = getAmazonECSClient();
+        AmazonECS client = getAmazonECSClient();
 
         try {
             DescribeTaskDefinitionResult result = client.describeTaskDefinition(
@@ -280,7 +285,7 @@ class ECSService {
 
     void removeTemplate(final ECSCloud cloud, final ECSTaskTemplate template) {
         // TODO finish implementation
-        // AmazonECSClient client = getAmazonECSClient();
+        // AmazonECS client = getAmazonECSClient();
         //
         // String familyName = fullQualifiedTemplateName(cloud, template);
         //
@@ -300,7 +305,7 @@ class ECSService {
     }
 
     String runEcsTask(final ECSSlave slave, final ECSTaskTemplate template, String clusterArn, Collection<String> command, TaskDefinition taskDefinition) throws IOException, AbortException {
-        AmazonECSClient client = getAmazonECSClient();
+        AmazonECS client = getAmazonECSClient();
         slave.setTaskDefinitonArn(taskDefinition.getTaskDefinitionArn());
 
         KeyValuePair envNodeName = new KeyValuePair();
@@ -354,7 +359,7 @@ class ECSService {
     }
 
     void waitForSufficientClusterResources(Date timeout, ECSTaskTemplate template, String clusterArn) throws InterruptedException, AbortException {
-        AmazonECSClient client = getAmazonECSClient();
+        AmazonECS client = getAmazonECSClient();
 
         boolean hasEnoughResources = false;
         WHILE:

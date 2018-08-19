@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  *
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class ECSComputer extends AbstractCloudComputer {
+public class ECSComputer extends AbstractCloudComputer<ECSSlave> {
     private static final Logger LOGGER = Logger.getLogger(ECSComputer.class.getName());
 
     public ECSComputer(ECSSlave slave) {
@@ -53,7 +53,7 @@ public class ECSComputer extends AbstractCloudComputer {
         super.taskAccepted(executor, task);
 
         LOGGER.log(Level.FINE, "Computer {0} taskAccepted", this);
-        
+
         // Now that we have a task, we want to make sure to tell Jenkins
         // that this computer is no longer accepting any additional tasks.
         setAcceptingTasks(false);
@@ -62,18 +62,18 @@ public class ECSComputer extends AbstractCloudComputer {
     @Override
     public void taskCompleted(Executor executor, Queue.Task task, long durationMS) {
         super.taskCompleted(executor, task, durationMS);
-        
+
         LOGGER.log(Level.FINE, "Computer {0} taskCompleted", this);
-        
+
         terminate();
     }
 
     @Override
     public void taskCompletedWithProblems(Executor executor, Queue.Task task, long durationMS, Throwable problems) {
         super.taskCompletedWithProblems(executor, task, durationMS, problems);
-        
+
         LOGGER.log(Level.FINE, "Computer {0} taskCompletedWithProblems", this);
-        
+
         terminate();
     }
 
@@ -82,7 +82,7 @@ public class ECSComputer extends AbstractCloudComputer {
      */
     private void terminate() {
         LOGGER.log(Level.INFO, "Attempting to terminate the node for computer: {0}", this);
-        
+
         // The task has been completed, so we want to make sure to tell Jenkins
         // that this computer is no longer accepting tasks.
         AbstractCloudSlave node = getNode();
