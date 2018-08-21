@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers;
 import java.util.Collection;
 import hudson.model.Node;
 
-@Ignore
+@Ignore // TODO re-enable
 public class ProvisioningCallbackTest {
 
     @Rule
@@ -34,7 +34,7 @@ public class ProvisioningCallbackTest {
             "templateName", "template-label",
             null, "image", "EC2", "remoteFSRoot",
             0, 0, 0, null, null, false, false,
-            "containerUser", null, null, null, null, null);
+            "containerUser", null, null, null, null, null, null, null);
 
         List<ECSTaskTemplate> templates = new ArrayList<ECSTaskTemplate>();
         ECSCloud cloud = new ECSCloud("testcloud", templates, "", "cluster", "regionName", "jenkinsUrl", 0);
@@ -59,7 +59,7 @@ public class ProvisioningCallbackTest {
             "templateName", "template-label",
             "arn::aws::region::taskdefinition", "image", "EC2", "remoteFSRoot",
             0, 0, 0, null, null, false, false,
-            "containerUser", null, null, null, null, null);
+            "containerUser", null, null, null, null, null, null, null);
 
         List<ECSTaskTemplate> templates = new ArrayList<ECSTaskTemplate>();
         ECSCloud cloud = new ECSCloud("testcloud", templates, "", "cluster", "regionName", "jenkinsUrl", 0);
@@ -87,7 +87,7 @@ public class ProvisioningCallbackTest {
             "templateName", "template-label",
             "arn::aws::region::taskdefinition", "image", "EC2", "remoteFSRoot",
             0, 0, 0, null, null, false, false,
-            "containerUser", null, null, null, null, null);
+            "containerUser", null, null, null, null, null, null, null);
 
         List<ECSTaskTemplate> templates = new ArrayList<ECSTaskTemplate>();
         ECSCloud cloud = new ECSCloud("testcloud", templates, "", "cluster", "regionName", "jenkinsUrl", 0);
