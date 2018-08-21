@@ -20,7 +20,7 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
     private static final transient String NAME_FORMAT = "%s-%s";
 
     private final transient ECSTaskTemplateStep step;
-    private final @Nonnull String cloud;
+    private @Nonnull String cloudName;
     private final @Nonnull String label;
 
     private ECSTaskTemplate newTemplate = null;
@@ -28,19 +28,34 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
     ECSTaskTemplateStepExecution(ECSTaskTemplateStep ecsTaskTemplateStep, StepContext context) {
         super(context);
         this.step = ecsTaskTemplateStep;
-        this.cloud = ecsTaskTemplateStep.getCloud();
+        this.cloudName = ecsTaskTemplateStep.getCloud();
         this.label = ecsTaskTemplateStep.getLabel();
     }
 
     @Override
     public boolean start() throws Exception {
         LOGGER.log(Level.INFO, "In ECSTaskTemplateExecution run()");
-        LOGGER.log(Level.INFO, "cloud: {0}", this.cloud);
+        LOGGER.log(Level.INFO, "cloud: {0}", this.cloudName);
         LOGGER.log(Level.INFO, "label: {0}", label);
         String randString = RandomStringUtils.random(5, "bcdfghjklmnpqrstvwxz0123456789");
         String name = String.format(NAME_FORMAT, step.getName(), randString);
 
-        Cloud cloud = Jenkins.getInstance().getCloud(this.cloud);
+        Cloud cloud = null;
+        String parentLabel = step.getInheritFrom();
+        if (parentLabel != null) {
+            for (Cloud c: Jenkins.getInstance().clouds) {
+                if (c instanceof ECSCloud) {
+                    ECSCloud ecsCloud = (ECSCloud)c;
+                    if (ecsCloud.canProvision(parentLabel)){
+                        cloud = c;
+                        cloudName = cloud.name;
+                    }
+                }
+            }
+        } else {
+            cloud = Jenkins.getInstance().getCloud(this.cloudName);
+        }
+
         ECSCloud ecsCloud = (ECSCloud) cloud;
         newTemplate = new ECSTaskTemplate(name,  // Template name
                                           label, // Node label
@@ -60,7 +75,8 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
                                           null,  // Environments
                                           null,  // Extra host entries
                                           null,  // Mount points
-                                          null); // Port mappings
+                                          null,  // Port mappings
+                                          step.getInheritFrom()); // Parent template
 
         newTemplate.setTaskrole(step.getTaskRoleArn());
         ecsCloud.registerTemplate(newTemplate);
@@ -79,13 +95,13 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
     @Override
     public void onResume() {
         super.onResume();
-        Cloud c = Jenkins.getInstance().getCloud(cloud);
+        Cloud c = Jenkins.getInstance().getCloud(cloudName);
         if (c == null) {
-            throw new RuntimeException(String.format("Cloud does not exist: %s", cloud));
+            throw new RuntimeException(String.format("Cloud does not exist: %s", cloudName));
         }
         if (!(c instanceof ECSCloud)) {
-            throw new RuntimeException(String.format("Cloud is not a Kubernetes cloud: %s (%s)", cloud,
-                    cloud.getClass().getName()));
+            throw new RuntimeException(String.format("Cloud is not an ECS cloud: %s (%s)", cloudName,
+                    c.getClass().getName()));
         }
         ECSCloud ecsCloud = (ECSCloud) c;
         ecsCloud.registerTemplate(newTemplate);
@@ -106,10 +122,10 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
          * Remove the template after step is done
          */
         protected void finished(StepContext context) throws Exception {
-            Cloud c = Jenkins.getInstance().getCloud(cloud);
+            Cloud c = Jenkins.getInstance().getCloud(cloudName);
             if (c == null) {
                 LOGGER.log(Level.WARNING, "Cloud {0} no longer exists, cannot delete task template {1}",
-                        new Object[] { cloud, taskTemplate.getTemplateName() });
+                        new Object[] { cloudName, taskTemplate.getTemplateName() });
                 return;
             }
             if (c instanceof ECSCloud) {

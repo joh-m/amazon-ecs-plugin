@@ -43,9 +43,11 @@ import hudson.model.labels.LabelAtom;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import com.google.common.base.Strings;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -237,6 +239,8 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
     private String logDriver;
     private List<LogDriverOption> logDriverOptions;
 
+    private String inheritFrom;
+
     @DataBoundConstructor
     public ECSTaskTemplate(@Nonnull String templateName,
                            @Nullable String label,
@@ -256,7 +260,8 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
                            @Nullable List<EnvironmentEntry> environments,
                            @Nullable List<ExtraHostEntry> extraHosts,
                            @Nullable List<MountPointEntry> mountPoints,
-                           @Nullable List<PortMappingEntry> portMappings) {
+                           @Nullable List<PortMappingEntry> portMappings,
+                           @Nullable String inheritFrom) {
         // if the user enters a task definition override, always prefer to use it, rather than the jenkins template.
         if (taskDefinitionOverride != null && !taskDefinitionOverride.trim().isEmpty()) {
             this.taskDefinitionOverride = taskDefinitionOverride.trim();
@@ -289,6 +294,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
         this.extraHosts = extraHosts;
         this.mountPoints = mountPoints;
         this.portMappings = portMappings;
+        this.inheritFrom = inheritFrom;
     }
 
     @DataBoundSetter
@@ -415,6 +421,15 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
         return logDriver;
     }
 
+    @DataBoundSetter
+    public void setInheritFrom(String inheritFrom) {
+        this.inheritFrom = inheritFrom;
+    }
+
+    public String getInheritFrom() {
+        return inheritFrom;
+    }
+
     public String getTemplateName() {return templateName; }
 
     public static class LogDriverOption extends AbstractDescribableImpl<LogDriverOption>{
@@ -470,6 +485,57 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
 
     public List<PortMappingEntry> getPortMappings() {
         return portMappings;
+    }
+
+    public ECSTaskTemplate combine(ECSTaskTemplate parent) {
+        if(parent == null) {
+          return this;
+        }
+
+        String templateName = Strings.isNullOrEmpty(this.templateName) ? parent.getTemplateName() : this.templateName;
+        String label = Strings.isNullOrEmpty(this.label) ? parent.getLabel() : this.label;
+        String taskDefinitionOverride = Strings.isNullOrEmpty(this.taskDefinitionOverride) ? parent.getTaskDefinitionOverride() : this.taskDefinitionOverride;
+        String image = Strings.isNullOrEmpty(this.image) ? parent.getImage() : this.image;
+        String launchType = Strings.isNullOrEmpty(this.launchType) ? parent.getLaunchType() : this.launchType;
+        String remoteFSRoot = Strings.isNullOrEmpty(this.remoteFSRoot) ? parent.getRemoteFSRoot() : this.remoteFSRoot;
+        int memory = this.memory == 0 ? parent.getMemory() : this.memory;
+        int memoryReservation = this.memoryReservation == 0 ? parent.getMemoryReservation() : this.memoryReservation;
+        int cpu = this.cpu == 0 ? parent.getCpu() : this.cpu;
+        String subnets = Strings.isNullOrEmpty(this.subnets) ? parent.getSubnets() : this.subnets;
+        String securityGroups = Strings.isNullOrEmpty(this.securityGroups) ? parent.getSecurityGroups() : this.securityGroups;
+        boolean assignPublicIp = this.assignPublicIp ? this.assignPublicIp : parent.getAssignPublicIp();
+        boolean privileged = this.privileged ? this.privileged : parent.getPrivileged();
+        String containerUser = Strings.isNullOrEmpty(this.containerUser) ? parent.getContainerUser() : this.containerUser;
+
+        // TODO probably merge lists with parent instead of overriding them
+        List<LogDriverOption> logDriverOptions = CollectionUtils.isEmpty(this.logDriverOptions) ? parent.getLogDriverOptions() : this.logDriverOptions;
+        List<EnvironmentEntry> environments = CollectionUtils.isEmpty(this.environments) ? parent.getEnvironments() : this.environments;
+        List<ExtraHostEntry> extraHosts = CollectionUtils.isEmpty(this.extraHosts) ? parent.getExtraHosts() : this.extraHosts;
+        List<MountPointEntry> mountPoints = CollectionUtils.isEmpty(this.mountPoints) ? parent.getMountPoints() : this.mountPoints;
+        List<PortMappingEntry> portMappings = CollectionUtils.isEmpty(this.portMappings) ? parent.getPortMappings() : this.portMappings;
+
+        ECSTaskTemplate combined = new ECSTaskTemplate(templateName,
+                                                       label,
+                                                       taskDefinitionOverride,
+                                                       image,
+                                                       launchType,
+                                                       remoteFSRoot,
+                                                       memory,
+                                                       memoryReservation,
+                                                       cpu,
+                                                       subnets,
+                                                       securityGroups,
+                                                       assignPublicIp,
+                                                       privileged,
+                                                       containerUser,
+                                                       logDriverOptions,
+                                                       environments,
+                                                       extraHosts,
+                                                       mountPoints,
+                                                       portMappings,
+                                                       null);
+
+        return combined;
     }
 
     Collection<KeyValuePair> getEnvironmentKeyValuePairs() {

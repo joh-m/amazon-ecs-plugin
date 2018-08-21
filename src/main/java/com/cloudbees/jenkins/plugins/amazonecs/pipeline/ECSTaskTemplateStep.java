@@ -7,6 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import java.io.Serializable;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
@@ -19,27 +20,29 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
     private static final Logger LOGGER = Logger.getLogger(ECSTaskTemplateStep.class.getName());
 
     private String DEFAULT_CLOUD = "a";
-    private String cloud = DEFAULT_CLOUD;
     private final String label;
     private final String name;
-    private int memory;
-    private int cpu;
+    private String cloud = DEFAULT_CLOUD;
+    private String taskDefinitionOverride;
     private String image;
+    private String launchType;
+    private String remoteFSRoot;
+    private int memory;
+    private int memoryReservation;
+    private int cpu;
+    private String subnets;
+    private String securityGroups;
+    private boolean assignPublicIp;
+    private boolean privileged;
+    private String containerUser;
     private String taskRoleArn;
+    private String inheritFrom;
 
     @DataBoundConstructor
-    public ECSTaskTemplateStep(String label, String cloud, int memory, int cpu, String name, String image, String taskRoleArn) {
-        this.cloud = cloud;
+    public ECSTaskTemplateStep(String label, String name) {
+
         this.label = label;
         this.name = name == null ? "jenkins-slave" : name;
-        this.memory = memory;
-        this.cpu = cpu;
-        this.image = image;
-        this.taskRoleArn = taskRoleArn;
-    }
-
-    public String getCloud() {
-        return cloud;
     }
 
     public String getLabel() {
@@ -50,22 +53,104 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         return name;
     }
 
-    public int getMemory() {
-        return memory;
+    @DataBoundSetter
+    public void setCloud(String cloud) {
+        this.cloud = cloud;
     }
 
-    public int getCpu() {
-        return cpu;
+    public String getCloud() {
+        return cloud;
+    }
+
+    @DataBoundSetter
+    public void setTaskDefinitionOverride(String taskDefinitionOverride) {
+        this.taskDefinitionOverride = taskDefinitionOverride;
+    }
+
+    @DataBoundSetter
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getImage() {
         return image;
     }
 
+    @DataBoundSetter
+    public void setLaunchType(String launchType) {
+        this.launchType = launchType;
+    }
+
+    @DataBoundSetter
+    public void setRemoteFSRoot(String remoteFSRoot) {
+        this.remoteFSRoot = remoteFSRoot;
+    }
+
+    @DataBoundSetter
+    public void setMemory(int memory) {
+        this.memory = memory;
+    }
+
+    public int getMemory() {
+        return memory;
+    }
+
+    @DataBoundSetter
+    public void setMemoryReservation(int memoryReservation) {
+        this.memoryReservation = memoryReservation;
+    }
+
+    @DataBoundSetter
+    public void setCpu(int cpu) {
+        this.cpu = cpu;
+    }
+
+    public int getCpu() {
+        return cpu;
+    }
+
+    @DataBoundSetter
+    public void setSubnets(String subnets) {
+        this.subnets = subnets;
+    }
+
+    @DataBoundSetter
+    public void setSecurityGroups(String securityGroups) {
+        this.securityGroups = securityGroups;
+    }
+
+    @DataBoundSetter
+    public void setAssignPublicIp(boolean assignPublicIp) {
+        this.assignPublicIp = assignPublicIp;
+    }
+
+    @DataBoundSetter
+    public void setPrivileged(boolean privileged) {
+        this.privileged = privileged;
+    }
+
+    @DataBoundSetter
+    public void containerUser(String containerUser) {
+        this.containerUser = containerUser;
+    }
+
+    @DataBoundSetter
+    public void setTaskRoleArn(String taskRoleArn) {
+        this.taskRoleArn = taskRoleArn;
+    }
+
     public String getTaskRoleArn() {
         return taskRoleArn;
     }
 
+    @DataBoundSetter
+    public void setInheritFrom(String inheritFrom) {
+        this.inheritFrom = inheritFrom;
+    }
+
+    public String getInheritFrom() {
+        return inheritFrom;
+    }
 
     @Override
     public StepExecution start(StepContext stepContext) throws Exception {

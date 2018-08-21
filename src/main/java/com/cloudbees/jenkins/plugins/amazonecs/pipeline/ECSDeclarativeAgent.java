@@ -19,10 +19,20 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
 
     private String label;
     private String cloud;
-    private int memory;
-    private int cpu;
+    private String taskDefinitionOverride;
     private String image;
+    private String launchType;
+    private String remoteFSRoot;
+    private int memory;
+    private int memoryReservation;
+    private int cpu;
+    private String subnets;
+    private String securityGroups;
+    private boolean assignPublicIp;
+    private boolean privileged;
+    private String containerUser;
     private String taskRoleArn;
+    private String inheritFrom;
 
     @DataBoundConstructor
     public ECSDeclarativeAgent() {
@@ -47,13 +57,8 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
     }
 
     @DataBoundSetter
-    public void setMemory(int memory) {
-        this.memory = memory;
-    }
-
-    @DataBoundSetter
-    public void setCpu(int cpu) {
-        this.cpu = cpu;
+    public void setTaskDefinitionOverride(String taskDefinitionOverride) {
+        this.taskDefinitionOverride = taskDefinitionOverride;
     }
 
     @DataBoundSetter
@@ -62,8 +67,63 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
     }
 
     @DataBoundSetter
+    public void setLaunchType(String launchType) {
+        this.launchType = launchType;
+    }
+
+    @DataBoundSetter
+    public void setRemoteFSRoot(String remoteFSRoot) {
+        this.remoteFSRoot = remoteFSRoot;
+    }
+
+    @DataBoundSetter
+    public void setMemory(int memory) {
+        this.memory = memory;
+    }
+
+    @DataBoundSetter
+    public void setMemoryReservation(int memoryReservation) {
+        this.memoryReservation = memoryReservation;
+    }
+
+    @DataBoundSetter
+    public void setCpu(int cpu) {
+        this.cpu = cpu;
+    }
+
+    @DataBoundSetter
+    public void setSubnets(String subnets) {
+        this.subnets = subnets;
+    }
+
+    @DataBoundSetter
+    public void setSecurityGroups(String securityGroups) {
+        this.securityGroups = securityGroups;
+    }
+
+    @DataBoundSetter
+    public void setAssignPublicIp(boolean assignPublicIp) {
+        this.assignPublicIp = assignPublicIp;
+    }
+
+    @DataBoundSetter
+    public void setPrivileged(boolean privileged) {
+        this.privileged = privileged;
+    }
+
+    @DataBoundSetter
+    public void containerUser(String containerUser) {
+        this.containerUser = containerUser;
+    }
+
+    @DataBoundSetter
     public void setTaskRoleArn(String taskRoleArn) {
         this.taskRoleArn = taskRoleArn;
+    }
+
+    @DataBoundSetter
+    public void setInheritFrom(String inheritFrom) {
+        this.inheritFrom = inheritFrom;
     }
 
 
@@ -79,20 +139,59 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
             argMap.put("cloud", cloud);
         }
 
-        if (memory != 0) {
-            argMap.put("memory", memory);
-        }
-
-        if (cpu != 0) {
-            argMap.put("cpu", cpu);
+        if (!StringUtils.isEmpty(taskDefinitionOverride)) {
+            argMap.put("taskDefinitionOverride", taskDefinitionOverride);
         }
 
         if (!StringUtils.isEmpty(image)) {
             argMap.put("image", image);
         }
 
+        if (!StringUtils.isEmpty(launchType)) {
+            argMap.put("launchType", launchType);
+        }
+
+        if (!StringUtils.isEmpty(remoteFSRoot)) {
+            argMap.put("remoteFSRoot", remoteFSRoot);
+        }
+
+        if (memory != 0) {
+            argMap.put("memory", memory);
+        }
+
+        if (memoryReservation != 0) {
+            argMap.put("memoryReservation", memoryReservation);
+        }
+
+        if (cpu != 0) {
+            argMap.put("cpu", cpu);
+        }
+
+        if (!StringUtils.isEmpty(subnets)) {
+            argMap.put("subnets", subnets);
+        }
+
+        if (!StringUtils.isEmpty(securityGroups)) {
+            argMap.put("securityGroups", securityGroups);
+        }
+
+        argMap.put("assignPublicIp", assignPublicIp);
+        argMap.put("privileged", privileged);
+
         if (!StringUtils.isEmpty(taskRoleArn)) {
             argMap.put("taskRoleArn", taskRoleArn);
+        }
+
+        if (!StringUtils.isEmpty(containerUser)) {
+            argMap.put("containerUser", containerUser);
+        }
+
+        if (!StringUtils.isEmpty(taskRoleArn)) {
+            argMap.put("taskRoleArn", taskRoleArn);
+        }
+
+        if (!StringUtils.isEmpty(inheritFrom)) {
+            argMap.put("inheritFrom", inheritFrom);
         }
 
         LOGGER.log(Level.INFO, "In getAsArgs. argMap: {0}", argMap.toString());

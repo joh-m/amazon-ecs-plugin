@@ -171,6 +171,10 @@ public class ECSCloud extends Cloud {
         return getTemplate(label) != null;
     }
 
+    public boolean canProvision(String label) {
+        return getTemplate(label) != null;
+    }
+
     private ECSTaskTemplate getTemplate(Label label) {
         if (label == null) {
             return null;
@@ -183,6 +187,17 @@ public class ECSCloud extends Cloud {
         return null;
     }
 
+    private ECSTaskTemplate getTemplate(String label) {
+        if (label == null) {
+            return null;
+        }
+        for (ECSTaskTemplate t : getTemplates()) {
+            if (label.matches(t.getLabel())) {
+                return t;
+            }
+        }
+        return null;
+    }
 
     @Override
     public Collection<NodeProvisioner.PlannedNode> provision(Label label, int excessWorkload) {
@@ -190,14 +205,17 @@ public class ECSCloud extends Cloud {
 			      LOGGER.log(Level.INFO, "Asked to provision {0} slave(s) for: {1}", new Object[]{excessWorkload, label});
 
             List<NodeProvisioner.PlannedNode> plannedNodes = new ArrayList<NodeProvisioner.PlannedNode>();
-            final ECSTaskTemplate template = getTemplate(label);
+            ECSTaskTemplate template = getTemplate(label);
+            String parentLabel = template.getInheritFrom();
+            final ECSTaskTemplate combined = template.combine(getTemplate(parentLabel));
+
 
             for (int i = 1; i <= excessWorkload; i++) {
-				        LOGGER.log(Level.INFO, "Will provision {0}, for label: {1}", new Object[]{template.getDisplayName(), label} );
+				        LOGGER.log(Level.INFO, "Will provision {0}, for label: {1}", new Object[]{combined.getDisplayName(), label} );
 
                 plannedNodes.add(new NodeProvisioner.PlannedNode(
                     template.getDisplayName(),
-                    Computer.threadPoolForRemoting.submit(new ProvisioningCallback(this, getEcsService(), template)),
+                    Computer.threadPoolForRemoting.submit(new ProvisioningCallback(this, getEcsService(), combined)),
                     1));
             }
             return plannedNodes;
