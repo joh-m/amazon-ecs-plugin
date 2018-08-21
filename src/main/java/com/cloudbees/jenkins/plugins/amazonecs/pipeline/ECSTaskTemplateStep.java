@@ -67,6 +67,10 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         this.taskDefinitionOverride = taskDefinitionOverride;
     }
 
+    public String getTaskDefinitionOverride() {
+        return taskDefinitionOverride;
+    }
+
     @DataBoundSetter
     public void setImage(String image) {
         this.image = image;
@@ -81,9 +85,17 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         this.launchType = launchType;
     }
 
+    public String getLaunchType() {
+        return launchType;
+    }
+
     @DataBoundSetter
     public void setRemoteFSRoot(String remoteFSRoot) {
         this.remoteFSRoot = remoteFSRoot;
+    }
+
+    public String getRemoteFSRoot() {
+        return remoteFSRoot;
     }
 
     @DataBoundSetter
@@ -100,6 +112,10 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         this.memoryReservation = memoryReservation;
     }
 
+    public int getMemoryReservation() {
+        return memoryReservation;
+    }
+
     @DataBoundSetter
     public void setCpu(int cpu) {
         this.cpu = cpu;
@@ -114,9 +130,17 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         this.subnets = subnets;
     }
 
+    public String getSubnets() {
+        return subnets;
+    }
+
     @DataBoundSetter
     public void setSecurityGroups(String securityGroups) {
         this.securityGroups = securityGroups;
+    }
+
+    public String getSecurityGroups() {
+        return securityGroups;
     }
 
     @DataBoundSetter
@@ -124,14 +148,26 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         this.assignPublicIp = assignPublicIp;
     }
 
+    public boolean getAssignPublicIp() {
+        return assignPublicIp;
+    }
+
     @DataBoundSetter
     public void setPrivileged(boolean privileged) {
         this.privileged = privileged;
     }
 
+    public boolean getPrivileged() {
+        return privileged;
+    }
+
     @DataBoundSetter
     public void containerUser(String containerUser) {
         this.containerUser = containerUser;
+    }
+
+    public String getContainerUser() {
+        return containerUser;
     }
 
     @DataBoundSetter

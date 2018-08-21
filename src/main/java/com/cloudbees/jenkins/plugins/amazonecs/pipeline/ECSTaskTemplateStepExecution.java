@@ -57,28 +57,28 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
         }
 
         ECSCloud ecsCloud = (ECSCloud) cloud;
-        newTemplate = new ECSTaskTemplate(name,  // Template name
-                                          label, // Node label
-                                          null,  // Task definition override
-                                          step.getImage(), // Image name
-                                          null,  // Launch type
-                                          null,  // Remote FS root
-                                          step.getMemory(), // Memory
-                                          0,     // Memory reservation
-                                          step.getCpu(),  // CPU
-                                          null,  // Subnets
-                                          null,  // Security groups
-                                          false, // Assign public IP
-                                          false, // Privileged
-                                          null,  // Container user
+        newTemplate = new ECSTaskTemplate(name,
+                                          label,
+                                          step.getTaskDefinitionOverride(),
+                                          step.getImage(),
+                                          step.getLaunchType(),
+                                          step.getRemoteFSRoot(),
+                                          step.getMemory(),
+                                          step.getMemoryReservation(),
+                                          step.getCpu(),
+                                          step.getSubnets(),
+                                          step.getSecurityGroups(),
+                                          step.getAssignPublicIp(),
+                                          step.getPrivileged(),
+                                          step.getContainerUser(),
                                           null,  // Log driver options
                                           null,  // Environments
                                           null,  // Extra host entries
                                           null,  // Mount points
                                           null,  // Port mappings
-                                          step.getInheritFrom()); // Parent template
+                                          step.getTaskRoleArn(),
+                                          step.getInheritFrom());
 
-        newTemplate.setTaskrole(step.getTaskRoleArn());
         ecsCloud.registerTemplate(newTemplate);
         getContext().newBodyInvoker().withContext(step).withCallback(new ECSTaskTemplateCallback(newTemplate)).start();
         return false;
