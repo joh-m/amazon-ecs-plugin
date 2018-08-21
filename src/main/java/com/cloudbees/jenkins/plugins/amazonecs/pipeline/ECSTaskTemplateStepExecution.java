@@ -76,7 +76,7 @@ public class ECSTaskTemplateStepExecution extends AbstractStepExecutionImpl {
                                           null,  // Extra host entries
                                           null,  // Mount points
                                           null,  // Port mappings
-                                          step.getTaskRoleArn(),
+                                          step.getTaskrole(),
                                           step.getInheritFrom());
 
         ecsCloud.registerTemplate(newTemplate);

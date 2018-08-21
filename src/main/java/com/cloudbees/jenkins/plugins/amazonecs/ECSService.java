@@ -223,9 +223,9 @@ class ECSService {
             LOGGER.log(Level.INFO, "Match on volumes: {0}", new Object[] {templateMatchesExistingVolumes});
             LOGGER.log(Level.FINE, "Match on volumes: {0}; template={1}; last={2}", new Object[] {templateMatchesExistingVolumes, template.getVolumeEntries(), currentTaskDefinition.getVolumes()});
 
-            templateMatchesExistingTaskRole = template.getTaskRoleArn() == null || template.getTaskRoleArn().equals(currentTaskDefinition.getTaskRoleArn());
+            templateMatchesExistingTaskRole = template.getTaskrole() == null || template.getTaskrole().equals(currentTaskDefinition.getTaskRoleArn());
             LOGGER.log(Level.INFO, "Match on task role: {0}", new Object[] {templateMatchesExistingTaskRole});
-            LOGGER.log(Level.FINE, "Match on task role: {0}; template={1}; last={2}", new Object[] {templateMatchesExistingTaskRole, template.getTaskRoleArn(), currentTaskDefinition.getTaskRoleArn()});
+            LOGGER.log(Level.FINE, "Match on task role: {0}; template={1}; last={2}", new Object[] {templateMatchesExistingTaskRole, template.getTaskrole(), currentTaskDefinition.getTaskRoleArn()});
 
             templateMatchesExistingExecutionRole = template.getExecutionRole() == null || template.getExecutionRole().equals(currentTaskDefinition.getExecutionRoleArn());
             LOGGER.log(Level.INFO, "Match on execution role: {0}", new Object[] {templateMatchesExistingExecutionRole});
@@ -252,8 +252,8 @@ class ECSService {
                     request.withExecutionRoleArn(executionRole);
                 }
             }
-            if (template.getTaskRoleArn() != null) {
-                request.withTaskRoleArn(template.getTaskRoleArn());
+            if (template.getTaskrole() != null) {
+                request.withTaskRoleArn(template.getTaskrole());
             }
             final RegisterTaskDefinitionResult result = client.registerTaskDefinition(request);
             LOGGER.log(Level.FINE, "Created Task Definition {0}: {1}", new Object[]{result.getTaskDefinition(), request});

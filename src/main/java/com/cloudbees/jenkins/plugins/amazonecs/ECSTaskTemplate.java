@@ -177,7 +177,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
      * @see RegisterTaskDefinitionRequest#withTaskRoleArn(String)
      */
     @CheckForNull
-    private String taskRoleArn;
+    private String taskrole;
 
     /**
      * ARN of the IAM role to use for the slave ECS task
@@ -261,7 +261,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
                            @Nullable List<ExtraHostEntry> extraHosts,
                            @Nullable List<MountPointEntry> mountPoints,
                            @Nullable List<PortMappingEntry> portMappings,
-                           @Nullable String taskRoleArn,
+                           @Nullable String taskrole,
                            @Nullable String inheritFrom) {
         // if the user enters a task definition override, always prefer to use it, rather than the jenkins template.
         if (taskDefinitionOverride != null && !taskDefinitionOverride.trim().isEmpty()) {
@@ -295,13 +295,13 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
         this.extraHosts = extraHosts;
         this.mountPoints = mountPoints;
         this.portMappings = portMappings;
-        this.taskRoleArn = taskRoleArn;
+        this.taskrole = taskrole;
         this.inheritFrom = inheritFrom;
     }
 
     @DataBoundSetter
-    public void setTaskroleArn(String taskRoleArn) {
-        this.taskRoleArn = StringUtils.trimToNull(taskRoleArn);
+    public void setTaskRole(String taskrole) {
+        this.taskrole = StringUtils.trimToNull(taskrole);
     }
 
     @DataBoundSetter
@@ -392,8 +392,8 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
         return entrypoint;
     }
 
-    public String getTaskRoleArn() {
-        return taskRoleArn;
+    public String getTaskrole() {
+        return taskrole;
     }
 
     public String getExecutionRole() {
@@ -516,7 +516,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
         List<MountPointEntry> mountPoints = CollectionUtils.isEmpty(this.mountPoints) ? parent.getMountPoints() : this.mountPoints;
         List<PortMappingEntry> portMappings = CollectionUtils.isEmpty(this.portMappings) ? parent.getPortMappings() : this.portMappings;
 
-        String taskRoleArn = Strings.isNullOrEmpty(this.taskRoleArn) ? parent.getTaskRoleArn() : this.taskRoleArn;
+        String taskrole = Strings.isNullOrEmpty(this.taskrole) ? parent.getTaskrole() : this.taskrole;
 
         ECSTaskTemplate combined = new ECSTaskTemplate(templateName,
                                                        label,
@@ -537,7 +537,7 @@ public class ECSTaskTemplate extends AbstractDescribableImpl<ECSTaskTemplate> im
                                                        extraHosts,
                                                        mountPoints,
                                                        portMappings,
-                                                       taskRoleArn,
+                                                       taskrole,
                                                        null);
 
         return combined;

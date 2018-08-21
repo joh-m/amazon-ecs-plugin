@@ -35,7 +35,7 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
     private boolean assignPublicIp;
     private boolean privileged;
     private String containerUser;
-    private String taskRoleArn;
+    private String taskrole;
     private String inheritFrom;
 
     @DataBoundConstructor
@@ -162,7 +162,7 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
     }
 
     @DataBoundSetter
-    public void containerUser(String containerUser) {
+    public void setContainerUser(String containerUser) {
         this.containerUser = containerUser;
     }
 
@@ -171,12 +171,12 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
     }
 
     @DataBoundSetter
-    public void setTaskRoleArn(String taskRoleArn) {
-        this.taskRoleArn = taskRoleArn;
+    public void setTaskrole(String taskrole) {
+        this.taskrole = taskrole;
     }
 
-    public String getTaskRoleArn() {
-        return taskRoleArn;
+    public String getTaskrole() {
+        return taskrole;
     }
 
     @DataBoundSetter

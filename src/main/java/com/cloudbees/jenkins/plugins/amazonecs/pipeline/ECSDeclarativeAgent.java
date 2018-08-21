@@ -31,7 +31,7 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
     private boolean assignPublicIp;
     private boolean privileged;
     private String containerUser;
-    private String taskRoleArn;
+    private String taskrole;
     private String inheritFrom;
 
     @DataBoundConstructor
@@ -112,13 +112,13 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
     }
 
     @DataBoundSetter
-    public void containerUser(String containerUser) {
+    public void setContainerUser(String containerUser) {
         this.containerUser = containerUser;
     }
 
     @DataBoundSetter
-    public void setTaskRoleArn(String taskRoleArn) {
-        this.taskRoleArn = taskRoleArn;
+    public void setTaskrole(String taskrole) {
+        this.taskrole = taskrole;
     }
 
     @DataBoundSetter
@@ -178,16 +178,12 @@ public class ECSDeclarativeAgent extends DeclarativeAgent<ECSDeclarativeAgent> {
         argMap.put("assignPublicIp", assignPublicIp);
         argMap.put("privileged", privileged);
 
-        if (!StringUtils.isEmpty(taskRoleArn)) {
-            argMap.put("taskRoleArn", taskRoleArn);
-        }
-
         if (!StringUtils.isEmpty(containerUser)) {
             argMap.put("containerUser", containerUser);
         }
 
-        if (!StringUtils.isEmpty(taskRoleArn)) {
-            argMap.put("taskRoleArn", taskRoleArn);
+        if (!StringUtils.isEmpty(taskrole)) {
+            argMap.put("taskrole", taskrole);
         }
 
         if (!StringUtils.isEmpty(inheritFrom)) {
