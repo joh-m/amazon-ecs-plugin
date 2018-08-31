@@ -227,6 +227,19 @@ public class ECSTaskTemplateStep extends Step implements Serializable {
         return "Step options: " +
                 "ecs{" + '\n' +
                 "cloud='" + cloud + '\'' + '\n' +
+                "taskDefinitionOverride='" + taskDefinitionOverride + '\'' + '\n' +
+                "launchType='" + launchType + '\'' + '\n' +
+                "remoteFSRoot='" + remoteFSRoot + '\'' + '\n' +
+                "memory='" + memory + '\'' + '\n' +
+                "memoryReservation='" + memoryReservation + '\'' + '\n' +
+                "cpu='" + cpu + '\'' + '\n' +
+                "subnets='" + subnets + '\'' + '\n' +
+                "securityGroups='" + securityGroups + '\'' + '\n' +
+                "assignPublicIp='" + assignPublicIp + '\'' + '\n' +
+                "privileged='" + privileged + '\'' + '\n' +
+                "containerUser='" + containerUser + '\'' + '\n' +
+                "taskrole='" + taskrole + '\'' + '\n' +
+                "inheritFrom='" + inheritFrom + '\'' + '\n' +
                 '}';
     }
 }
